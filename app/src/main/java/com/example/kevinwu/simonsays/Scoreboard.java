@@ -15,6 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.jar.Attributes;
 
 public class Scoreboard extends AppCompatActivity {
@@ -23,7 +25,6 @@ public class Scoreboard extends AppCompatActivity {
 
     private final String STATE_KEY = "leaderListKey";
     private final String MY_PREFS_NAME = "SimonSays";
-    private int sharedPrefKeys = 0;
     private final String PREF_INITIALIZED = "init";
 
     private int score;
@@ -37,7 +38,7 @@ public class Scoreboard extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        score = 0;
+        score = -1;
         score_display = (TextView) findViewById(R.id.player_score);
 
         Bundle extras = getIntent().getExtras();
@@ -46,13 +47,22 @@ public class Scoreboard extends AppCompatActivity {
             name = extras.getString("Name");
         }
 
-        score_display.setText(Integer.toString(score));
+        if(score == -1)
+        {
+            TextView textView = (TextView) findViewById(R.id.score_message);
+            textView.setVisibility(View.INVISIBLE);
+            TextView textView1 = (TextView) findViewById(R.id.player_score);
+            textView1.setVisibility(View.INVISIBLE);
+        }
+        else {
+            score_display.setText(Integer.toString(score));
 
-        PlayerInfo player = new PlayerInfo();
-        player.setPlayerName(name);
-        player.setPlayerScore(score);
+            PlayerInfo player = new PlayerInfo();
+            player.setPlayerName(name);
+            player.setPlayerScore(score);
 
-        leaderList.add(player);
+            leaderList.add(player);
+        }
 
         ListView listView;
         ListAdapter listAdapter;
@@ -78,6 +88,15 @@ public class Scoreboard extends AppCompatActivity {
                 }
             }
         }
+
+        Collections.sort(leaderList, new Comparator<PlayerInfo>() {
+            @Override
+            public int compare(PlayerInfo o1, PlayerInfo o2) {
+                return o1.getPlayerScore() > o2.getPlayerScore() ? -1
+                        : o1.getPlayerScore() < o2.getPlayerScore() ? 1
+                        : 0;
+            }
+        });
 
         PlayerInfo[] mLeaders = new PlayerInfo[leaderList.size()];
 
@@ -130,7 +149,7 @@ public class Scoreboard extends AppCompatActivity {
     }
 
     public void restart(View view) {
-        Intent intent = new Intent(this, NameScreen.class);
+        Intent intent = new Intent(this, WelcomeScreen.class);
         startActivity(intent);
     }
 }
